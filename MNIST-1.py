@@ -1,3 +1,5 @@
+# https://github.com/Hvass-Labs/TensorFlow-Tutorials/blob/master/README.md
+
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
