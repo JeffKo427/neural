@@ -406,6 +406,6 @@ def print_test_accuracy(show_example_errors=False,
         print("Confusion Matrix:")
         plot_confusion_matrix(cls_pred=cls_pred)
 
-optimize(num_iterations=10000)
+optimize(num_iterations=2000)
 print_test_accuracy(show_example_errors=True,
                     show_confusion_matrix=True)
