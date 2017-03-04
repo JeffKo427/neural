@@ -15,18 +15,17 @@ import cv2
 
 data_dir = 'contours/'
 files = os.listdir(data_dir)
-print(files)
 contours = []
 for f in files:
     with open(data_dir + f,'rb') as fp:
         if f.endswith('_bad'):
             loaded = pickle.load(fp, encoding='latin1')
             for l in loaded:
-                contours.append(l)
+                contours.append( (l, 0) )
         if f.endswith('_good'):
             loaded = pickle.load(fp, encoding='latin1')
             for l in loaded:
-                contours.append(l)
+                contours.append( (l, 0) )
 
 # Normalize the data to be shift-invariant by moving the contour to the top-left.
 def makeShiftInvariant(contour):
@@ -70,8 +69,10 @@ nb_classes = 2
 nb_epoch = 12
 
 #TODO: Shuffle the data and split them into training and test sets.
+print( len(contours) )
 for c in contours:
-    makeShiftInvariant(c)
-    img = imagize(c)
+    makeShiftInvariant(c[0])
+    img = imagize(c[0])
     cv2.imshow('Contour', img)
-    cv2.waitKey(0)
+    if 0xFF & cv2.waitKey(0) == 27:
+        break
