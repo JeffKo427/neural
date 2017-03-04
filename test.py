@@ -32,11 +32,24 @@ for c in contours:
 
 
 
-#TODO: Normalize the data to be shift-invariant by moving the contour to the top-left.
+# Normalize the data to be shift-invariant by moving the contour to the top-left.
+def makeShiftInvariant(contour):
+     lowest_x = 1e9
+     lowest_y = 1e9
+     for px in contour[0]:
+         if px[0] < lowest_x:
+             lowest_x = px[0]
+         if px[1] < lowest_y:
+             lowest_y = px[1]
+     for px in contour[0]:
+         px[0] = px[0] - lowest_x
+         px[1] = px[1] - lowest_y
+     return contour
+
 
 #TODO: Normalize the data to be scale-invariant by drawing the contour on a black image and resizing that image to 256x256 pixels.
 
-#TODO: Double the size of our data by mirroring every contour. (Don't flip them, though. It's not rotation-invariant.
+#TODO: Double the size of our data by mirroring every contour. (Don't flip them, though. It's not rotation-invariant.)
 
 # HYPERPARAMETERS
 batch_size = 128
