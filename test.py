@@ -1,5 +1,17 @@
+from __future__ import print_function
+import numpy as np
+np.random.seed(1337)
+
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Convolution2D, MaxPooling2D
+from keras.utils import np_utils
+from keras import backend as K
+
 import os
 import pickle
+
+import cv2
 
 data_dir = 'contours/'
 files = os.listdir(data_dir)
@@ -17,3 +29,18 @@ for f in files:
                 contours.append(l)
 for c in contours:
     print(c)
+
+
+
+#TODO: Normalize the data to be shift-invariant by moving the contour to the top-left.
+
+#TODO: Normalize the data to be scale-invariant by drawing the contour on a black image and resizing that image to 256x256 pixels.
+
+#TODO: Double the size of our data by mirroring every contour. (Don't flip them, though. It's not rotation-invariant.
+
+# HYPERPARAMETERS
+batch_size = 128
+nb_classes = 2
+nb_epoch = 12
+
+#TODO: Shuffle the data and split them into training and test sets.
