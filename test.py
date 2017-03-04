@@ -10,7 +10,7 @@ from keras import backend as K
 
 import os
 import pickle
-
+import time
 import cv2
 
 data_dir = 'contours/'
@@ -27,30 +27,28 @@ for f in files:
             loaded = pickle.load(fp, encoding='latin1')
             for l in loaded:
                 contours.append(l)
-for c in contours:
-    print(c)
-
-
 
 # Normalize the data to be shift-invariant by moving the contour to the top-left.
 def makeShiftInvariant(contour):
      lowest_x = 1e9
      lowest_y = 1e9
-     for px in contour[0]:
+     for pixel in contour:
+         px = pixel[0]
          if px[0] < lowest_x:
              lowest_x = px[0]
          if px[1] < lowest_y:
              lowest_y = px[1]
-     for px in contour[0]:
+     for pixel in contour:
+         px = pixel[0]
          px[0] = px[0] - lowest_x
          px[1] = px[1] - lowest_y
-     return contour
 
 #TODO: Normalize the data to be scale-invariant by drawing the contour on a black image and resizing that image to 256x256 pixels.
 def imagize(contour):
     highest_x = 0
     highest_y = 0
-    for px in contour[0]:
+    for pixel in contour:
+        px = pixel[0]
         if px[0] > highest_x:
             highest_x = px[0]
         if px[1] > highest_y:
@@ -58,8 +56,8 @@ def imagize(contour):
     dim = max(highest_x, highest_y)
 
     size = dim,dim,1
-    img = np.zeros(size, dtype=np.unit8)
-    cv2.drawContours(img, [contour], -1, 255)
+    img = np.zeros(size, dtype=np.uint8)
+    cv2.drawContours(img, [contour], -1, 255, -1)
 
     datum = cv2.resize( img, (256,256) )
     return datum
@@ -72,4 +70,9 @@ nb_classes = 2
 nb_epoch = 12
 
 #TODO: Shuffle the data and split them into training and test sets.
-
+for c in contours:
+    makeShiftInvariant(c)
+    img = imagize(c)
+    cv2.imshow('Contour', img)
+    if 0xFF & cv2.waitKey(0) != 27:
+        True
