@@ -46,8 +46,23 @@ def makeShiftInvariant(contour):
          px[1] = px[1] - lowest_y
      return contour
 
-
 #TODO: Normalize the data to be scale-invariant by drawing the contour on a black image and resizing that image to 256x256 pixels.
+def imagize(contour):
+    highest_x = 0
+    highest_y = 0
+    for px in contour[0]:
+        if px[0] > highest_x:
+            highest_x = px[0]
+        if px[1] > highest_y:
+            highest_y = px[1]
+    dim = max(highest_x, highest_y)
+
+    size = dim,dim,1
+    img = np.zeros(size, dtype=np.unit8)
+    cv2.drawContours(img, [contour], -1, 255)
+
+    datum = cv2.resize( img, (256,256) )
+    return datum
 
 #TODO: Double the size of our data by mirroring every contour. (Don't flip them, though. It's not rotation-invariant.)
 
