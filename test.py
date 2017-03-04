@@ -74,5 +74,4 @@ for c in contours:
     makeShiftInvariant(c)
     img = imagize(c)
     cv2.imshow('Contour', img)
-    if 0xFF & cv2.waitKey(0) != 27:
-        True
+    cv2.waitKey(0)
