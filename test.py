@@ -44,3 +44,4 @@ nb_classes = 2
 nb_epoch = 12
 
 #TODO: Shuffle the data and split them into training and test sets.
+
