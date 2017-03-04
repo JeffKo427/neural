@@ -6,4 +6,5 @@ for f in files:
 	if f.endswith('bad'):
 		reader = open('contours/' + f)
 		ctr = []
-		while 
+		l = reader.readline()
+		while l != ''
