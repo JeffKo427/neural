@@ -10,6 +10,7 @@ cap = skvideo.io.vreader(sys.argv[1])
 counter = 0
 
 for full_frame in cap:
+    print(full_frame)
     cv2.imshow('img',full_frame)
     #ret, full_frame = cap.read()
     '''

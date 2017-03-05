@@ -7,7 +7,7 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, ModelCheckpoint
 
 import os
 import pickle
@@ -27,7 +27,7 @@ for f in files:
         if f.endswith('_good'):
             loaded = pickle.load(fp, encoding='latin1')
             for l in loaded:
-                contours.append( (l, 0) )
+                contours.append( (l, 1) )
 
 # Normalize the data to be shift-invariant by moving the contour to the top-left.
 def makeShiftInvariant(contour):
@@ -66,9 +66,9 @@ def imagize(contour):
 #TODO: Double the size of our data by mirroring every contour. (Don't flip them, though. It's not rotation-invariant.)
 
 # HYPERPARAMETERS
-batch_size = 128
+batch_size = 32
 nb_classes = 2
-nb_epoch = 2
+nb_epoch = 12
 
 # input image dimensions
 img_rows, img_cols = 128,128
@@ -103,6 +103,9 @@ for datum in all_data:
     else:
         xtr.append( datum[0] )
         ytr.append( datum[1] )
+
+print(xtr)
+print(ytr)
 
 X_train = np.array(xtr)
 y_train = np.array(ytr)
@@ -152,10 +155,17 @@ model.compile(loss='categorical_crossentropy',
               optimizer='adadelta',
               metrics=['accuracy'])
 
-cb = TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True, write_images=True)
+checkpoint = ModelCheckpoint('contour_model.h5', monitor='val_acc', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
+tb = TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True, write_images=True)
 model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
-          verbose=1, callbacks=[cb], validation_data=(X_test, Y_test))
+          verbose=1, callbacks=[tb, checkpoint], validation_data=(X_test, Y_test))
 score = model.evaluate(X_test, Y_test, verbose=0)
 print('Test score:', score[0])
 print('Test accuracy:', score[1])
-model.save('contour_model.h5')
+
+def viewResults():
+    results = model.predict(X_test, batch_size=32, verbose=0)
+    pickle.dump( results, open('results/predictions','wb') )
+    pickle.dump( xte, open('results/inputs', 'wb') )
+
+viewResults()
