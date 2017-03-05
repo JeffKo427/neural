@@ -1,6 +1,4 @@
 from __future__ import print_function
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
 import numpy as np
 np.random.seed(1337)  # for reproducibility
 
@@ -15,7 +13,7 @@ from keras.callbacks import TensorBoard
 # HYPERPARAMETERS
 batch_size = 128
 nb_classes = 10
-nb_epoch = 3
+nb_epoch = 12
 
 # input image dimensions
 img_rows, img_cols = 28, 28
@@ -75,7 +73,7 @@ model.compile(loss='categorical_crossentropy',
 #from keras.utils.visualize_util import plot
 #plot(model, to_file='model.png')
 
-cb = TensorBoard(log_dir='./logs', histogram_freq=1, write_graph=True, write_images=True)
+cb = TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True, write_images=True)
 model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
           verbose=1, callbacks=[cb], validation_data=(X_test, Y_test))
 score = model.evaluate(X_test, Y_test, verbose=0)

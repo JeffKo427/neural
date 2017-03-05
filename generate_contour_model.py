@@ -7,6 +7,7 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
+from keras.callbacks import TensorBoard
 
 import os
 import pickle
@@ -59,7 +60,7 @@ def imagize(contour):
     img = np.zeros(size, dtype=np.uint8)
     cv2.drawContours(img, [contour], -1, 255, -1)
 
-    datum = cv2.resize( img, (256,256) )
+    datum = cv2.resize( img, (128,128) )
     return datum
 
 #TODO: Double the size of our data by mirroring every contour. (Don't flip them, though. It's not rotation-invariant.)
@@ -67,10 +68,10 @@ def imagize(contour):
 # HYPERPARAMETERS
 batch_size = 128
 nb_classes = 2
-nb_epoch = 12
+nb_epoch = 2
 
 # input image dimensions
-img_rows, img_cols = 256, 256
+img_rows, img_cols = 128,128
 # number of convolutional filters to use
 nb_filters = 32
 # size of pooling area for max pooling
@@ -151,9 +152,10 @@ model.compile(loss='categorical_crossentropy',
               optimizer='adadelta',
               metrics=['accuracy'])
 
+cb = TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True, write_images=True)
 model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
-          verbose=1, validation_data=(X_test, Y_test))
+          verbose=1, callbacks=[cb], validation_data=(X_test, Y_test))
 score = model.evaluate(X_test, Y_test, verbose=0)
 print('Test score:', score[0])
 print('Test accuracy:', score[1])
-
+model.save('contour_model.h5')
