@@ -1,4 +1,6 @@
 from __future__ import print_function
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
 import numpy as np
 np.random.seed(1337)  # for reproducibility
 
@@ -68,6 +70,9 @@ model.add(Activation('softmax'))
 model.compile(loss='categorical_crossentropy',
               optimizer='adadelta',
               metrics=['accuracy'])
+
+from keras.utils.visualize_util import plot
+plot(model, to_file='model.png')
 
 model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
           verbose=1, validation_data=(X_test, Y_test))
