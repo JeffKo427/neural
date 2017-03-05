@@ -10,11 +10,12 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
+from keras.callbacks import TensorBoard
 
 # HYPERPARAMETERS
 batch_size = 128
 nb_classes = 10
-nb_epoch = 12
+nb_epoch = 3
 
 # input image dimensions
 img_rows, img_cols = 28, 28
@@ -71,11 +72,12 @@ model.compile(loss='categorical_crossentropy',
               optimizer='adadelta',
               metrics=['accuracy'])
 
-from keras.utils.visualize_util import plot
-plot(model, to_file='model.png')
+#from keras.utils.visualize_util import plot
+#plot(model, to_file='model.png')
 
+cb = TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True, write_images=True)
 model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
-          verbose=1, validation_data=(X_test, Y_test))
+          verbose=1, callbacks=[cb], validation_data=(X_test, Y_test))
 score = model.evaluate(X_test, Y_test, verbose=0)
 print('Test score:', score[0])
 print('Test accuracy:', score[1])
