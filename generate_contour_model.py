@@ -68,7 +68,7 @@ def imagize(contour):
 # HYPERPARAMETERS
 batch_size = 32
 nb_classes = 2
-nb_epoch = 12
+nb_epoch = 4
 
 # input image dimensions
 img_rows, img_cols = 128,128
