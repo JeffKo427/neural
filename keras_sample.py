@@ -75,7 +75,7 @@ model.compile(loss='categorical_crossentropy',
 #from keras.utils.visualize_util import plot
 #plot(model, to_file='model.png')
 
-cb = TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True, write_images=True)
+cb = TensorBoard(log_dir='./logs', histogram_freq=1, write_graph=True, write_images=True)
 model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
           verbose=1, callbacks=[cb], validation_data=(X_test, Y_test))
 score = model.evaluate(X_test, Y_test, verbose=0)
