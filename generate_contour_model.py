@@ -165,7 +165,8 @@ print('Test accuracy:', score[1])
 
 def viewResults():
     results = model.predict(X_test, batch_size=32, verbose=0)
-    pickle.dump( results, open('results/predictions','wb') )
-    pickle.dump( xte, open('results/inputs', 'wb') )
+    pickle.dump( results, open('results/predictions','wb'), protocol=0 )
+    pickle.dump( yte, open('results/true','wb'), protocol=0 )
+    pickle.dump( xte, open('results/inputs', 'wb'), protocol=0 )
 
 viewResults()
