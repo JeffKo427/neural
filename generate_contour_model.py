@@ -66,9 +66,9 @@ def imagize(contour):
 #TODO: Double the size of our data by mirroring every contour. (Don't flip them, though. It's not rotation-invariant.)
 
 # HYPERPARAMETERS
-batch_size = 32
+batch_size = 128
 nb_classes = 2
-nb_epoch = 4
+nb_epoch = 12
 
 # input image dimensions
 img_rows, img_cols = 128,128
@@ -78,6 +78,25 @@ nb_filters = 32
 pool_size = (2, 2)
 # convolution kernel size
 kernel_size = (3, 3)
+
+def buildModel():
+    model = Sequential()
+
+    model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1],
+                            border_mode='valid',
+                            input_shape=input_shape))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1]))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=pool_size))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(nb_classes))
+    model.add(Activation('softmax'))
+    return model
 
 # the data, shuffled and split between train and test sets
 #(X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -104,8 +123,8 @@ for datum in all_data:
         xtr.append( datum[0] )
         ytr.append( datum[1] )
 
-print(xtr)
-print(ytr)
+#print(xtr)
+#print(ytr)
 
 X_train = np.array(xtr)
 y_train = np.array(ytr)
@@ -133,24 +152,7 @@ print(X_test.shape[0], 'test samples')
 Y_train = np_utils.to_categorical(y_train, nb_classes)
 Y_test = np_utils.to_categorical(y_test, nb_classes)
 
-model = Sequential()
-
-model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1],
-                        border_mode='valid',
-                        input_shape=input_shape))
-model.add(Activation('relu'))
-model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1]))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=pool_size))
-model.add(Dropout(0.25))
-
-model.add(Flatten())
-model.add(Dense(128))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(nb_classes))
-model.add(Activation('softmax'))
-
+model = buildModel()
 model.compile(loss='categorical_crossentropy',
               optimizer='adadelta',
               metrics=['accuracy'])
