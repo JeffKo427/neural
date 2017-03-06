@@ -1,6 +1,6 @@
 from __future__ import print_function
 import numpy as np
-np.random.seed(1337)
+#np.random.seed(1337)
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -44,7 +44,7 @@ def makeShiftInvariant(contour):
          px[0] = px[0] - lowest_x
          px[1] = px[1] - lowest_y
 
-#TODO: Normalize the data to be scale-invariant by drawing the contour on a black image and resizing that image to 256x256 pixels.
+#Normalize the data to be scale-invariant by drawing the contour on a black image and resizing that image to 256x256 pixels.
 def imagize(contour):
     highest_x = 0
     highest_y = 0
@@ -116,7 +116,7 @@ xte = []
 yte = []
 
 for datum in all_data:
-    if random.random() < 0.2:
+    if np.random.random() < 0.2:
         xte.append( datum[0] )
         yte.append( datum[1] )
     else:
