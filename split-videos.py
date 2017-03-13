@@ -32,13 +32,13 @@ def writeFrames(video, directory, size=(320,180)):
         if not ret:
             print "Failed to get frame, aborting split."
             break
-        frame = cv2.resize(full_frame, size)
+        #frame = cv2.resize(full_frame, size)
         full_name = directory + name + '-' + str(cap.get(1)) + '.png'
-        cv2.imwrite(full_name, frame)
+        cv2.imwrite(full_name, full_frame)
 
 
-true_dir = 'data/images_true/'
-false_dir = 'data/images_false/'
+true_dir = 'data/images/images_true/'
+false_dir = 'data/images/images_false/'
 #TODO: assert that these dirs are empty
 for v in vids0:
     print "Splitting " + v + "..."
