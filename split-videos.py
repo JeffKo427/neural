@@ -24,26 +24,31 @@ for f in files:
         print "File " + f + " not properly formatted, should end in either 0 or 1. Ignoring."
 
 # Write each frame of these videos to file.
-def writeFrames(video, directory, size=(320,180)):
+def writeFrames(video, train_directory, test_directory, size=(320,180)):
     cap = cv2.VideoCapture(video)
     name = video.rsplit('/',1)[-1]
-    while cap.get(1) != cap.get(7): # frame position = frame count
+    while cap.get(1) != cap.get(7): # frame position != frame count
         ret, full_frame = cap.read()
         if not ret:
             print "Failed to get frame, aborting split."
             break
         #frame = cv2.resize(full_frame, size)
-        full_name = directory + name + '-' + str(cap.get(1)) + '.png'
+        if random.random() < 0.025:
+            full_name = test_directory + name + '-' + str(cap.get(1)) + '.png'
+        else:
+            full_name = train_directory + name + '-' + str(cap.get(1)) + '.png'
         cv2.imwrite(full_name, full_frame)
 
 
-true_dir = 'data/images/images_true/'
-false_dir = 'data/images/images_false/'
+train_true = 'data/training/1/'
+train_false = 'data/training/0/'
+val_true = 'data/validation/1/'
+val_false = 'data/validation/0/'
 #TODO: assert that these dirs are empty
 for v in vids0:
     print "Splitting " + v + "..."
-    writeFrames(v, false_dir)
+    writeFrames(v, train_false, val_false)
 for v in vids1:
     print "Splitting " + v + "..."
-    writeFrames(v, true_dir)
+    writeFrames(v, train_true, val_true)
 
