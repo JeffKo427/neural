@@ -33,7 +33,7 @@ def writeFrames(video, train_directory, test_directory, size=(320,180)):
             print "Failed to get frame, aborting split."
             break
         #frame = cv2.resize(full_frame, size)
-        if random.random() < 0.025:
+        if random.random() < 0.2:
             full_name = test_directory + name + '-' + str(cap.get(1)) + '.png'
         else:
             full_name = train_directory + name + '-' + str(cap.get(1)) + '.png'

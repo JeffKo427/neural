@@ -43,11 +43,12 @@ datagen = ImageDataGenerator(
         horizontal_flip=True,
         rescale=1./255)
 
-generator = datagen.flow_from_directory(
+train_generator = datagen.flow_from_directory(
         'data/images/',
         target_size=(320,180),
         batch_size=128,
         class_mode='binary')
+
 
 model = buildModel()
 model.compile(loss='categorical_crossentropy',
