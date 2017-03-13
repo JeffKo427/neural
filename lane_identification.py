@@ -44,18 +44,41 @@ datagen = ImageDataGenerator(
         rescale=1./255)
 
 train_generator = datagen.flow_from_directory(
-        'data/images/',
-        target_size=(320,180),
-        batch_size=128,
+        'data/training/',
+        target_size=image_size,
+        batch_size=batch_size,
         class_mode='binary')
 
+validation_generator = datagen.flow_from_directory(
+        'data/validation/',
+        target_size=image_size,
+        batch_size=batch_size,
+        class_mode='binary')
 
 model = buildModel()
 model.compile(loss='categorical_crossentropy',
         optimizer='adadelta',
-        metrics=(['accuracy'])
+        metrics=(['accuracy']))
+
+checkpoint = ModelCheckpoint(
+        'lane_identifier.h5',
+        monitor='val_acc',
+        verbose=0,
+        save_best_only=True,
+        save_weights_only=False,
+        mode='auto',
+        period=1)
+tb = TensorBoard(
+        log_dir='./logs',
+        histogram_freq=0,
+        write_graph=True,
+        write_images=True)
+
 model.fit_generator(
         generator,
-        samples_per_epoch=2000, #TODO
-        nb_epoch=nb_epoch)
+        samples_per_epoch=20000, #TODO
+        nb_epoch=nb_epoch,
+        callbacks=[checkpoint,tb],
+        validation_data=validation_generator,
+        nb_val_samples=8000) #TODO
 
