@@ -3,7 +3,7 @@ import os
 
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D, Reshape
+from keras.layers import Convolution2D, MaxPooling2D, Reshape, BatchNormalization
 from keras.utils import np_utils
 from keras import backend as K
 from keras.callbacks import TensorBoard, ModelCheckpoint
@@ -12,14 +12,14 @@ from keras.preprocessing.image import ImageDataGenerator
 # HYPERPARAMETERS
 batch_size = 128
 nb_classes = 2
-nb_epoch = 5
+nb_epoch = 20
 nb_filters = 32
 pool_size = (2, 2)
 kernel_size = (3, 3)
 image_size = (180,320)
 input_shape = (image_size[0], image_size[1], 3)
 
-def buildModel():
+def buildKerasSampleModel():
     model = Sequential()
 
     model.add(Reshape((image_size[1], image_size[0], 3), input_shape=input_shape))
@@ -35,6 +35,32 @@ def buildModel():
     model.add(Dense(128))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
+    model.add(Dense(nb_classes))
+    model.add(Activation('softmax'))
+
+    return model
+
+def buildSegNetEncoder():
+    model = Sequential()
+
+    model.add(Reshape((image_size[1], image_size[0], 3), input_shape=input_shape))
+
+    model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1], border_mode='valid'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=pool_size))
+
+    model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1], border_mode='valid'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=pool_size))
+
+    model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1], border_mode='valid'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=pool_size))
+
+    model.add(Flatten())
     model.add(Dense(nb_classes))
     model.add(Activation('softmax'))
 
@@ -60,7 +86,7 @@ modelName = 'lane_identifier.h5'
 if modelName in os.listdir():
     model = load_model(modelName)
 else:
-    model = buildModel()
+    model = buildSegNetEncoder()
     model.compile(loss='categorical_crossentropy',
             optimizer='adadelta',
             metrics=(['accuracy']))
