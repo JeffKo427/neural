@@ -152,7 +152,7 @@ for e in range(nb_epoch):
     for X_train, y_raw in training_generator:
         Y_train = reshapeY(y_raw)
 
-        model.train_on_batch(X_train, Y_train)
+        print(model.train_on_batch(X_train, Y_train))
 
         batches += 1
         print("Batch " + str(batches) + " of 150.")
@@ -173,7 +173,6 @@ for X_vis, y_raw in validation_generator:
     print(X_vis.shape)
     for i in range(batch_size):
         cv2.imshow('Original', X_vis[i]/255)
-        print(Y_pred[i].shape)
         cv2.imshow('Ground Truth', y_raw[i]/10)
         cv2.imshow('Prediction', unshapeY(Y_pred[i])/10)
         cv2.waitKey(0)
