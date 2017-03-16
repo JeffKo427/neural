@@ -29,7 +29,7 @@ img_width = 640
 img_height = 360
 input_shape = (img_height, img_width, 3)
 
-# TODO: Add an encoder block of three conv + batch norm + ReLU blocks followed by a pooling layer.
+# Add an encoder block of three conv + batch norm + ReLU blocks followed by a pooling layer.
 def addEncoderBlock(model):
     model.add(ZeroPadding2D(padding=padding)),
     model.add(Convolution2D(nb_filters, kernel[0], kernel[1], border_mode='valid'))
@@ -38,7 +38,7 @@ def addEncoderBlock(model):
     model.add(MaxPooling2D(pool_size=pool_size))
 
 
-# TODO: Add a decoder block of an upsampling layer followed by three blocks of conv + batch norm + ReLU.
+# Add a decoder block of an upsampling layer followed by three blocks of conv + batch norm + ReLU.
 def addDecoderBlock(model, upsample=True):
     if upsample:
         model.add(UpSampling2D(size=pool_size))
