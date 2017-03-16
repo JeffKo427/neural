@@ -15,7 +15,15 @@ nb_epoch = 20
 nb_filters = 32
 kernel_size = (3,3)
 pool_size = (2,2)
-data_gen_args = dict()
+padding = (1,1)
+data_gen_args = dict(
+        #featurewise_center=True,
+        #featurewise_std_normalization=True,
+        rotation_range = 20.,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        zoom_range=0.2,
+        horizontal_flip=True)
 model_name = 'SegNet.h5'
 img_width = 640
 img_height = 360
@@ -23,19 +31,26 @@ input_shape = (img_height, img_width, 3)
 
 # TODO: Add an encoder block of three conv + batch norm + ReLU blocks followed by a pooling layer.
 def addEncoderBlock(model):
+    model.add(ZeroPadding2D(padding=padding)),
+    model.add(Convolution2D(nb_filters, kernel[0], kernel[1], border_mode='valid'))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=pool_size))
 
-    return model #TODO: can we pass by reference?
 
 # TODO: Add a decoder block of an upsampling layer followed by three blocks of conv + batch norm + ReLU.
-def addDecoderBlock(model):
-
-    return model
+def addDecoderBlock(model, upsample=True):
+    if upsample:
+        model.add(UpSampling2D(size=pool_size))
+    model.add(ZeroPadding2D(padding=padding))
+    model.add(Convolution2D(nb_filters, kernel[0], kernel[1], border_mode='valid'))
+    model.add(BatchNormalization())
 
 # TODO: Build the model.
 def buildModel():
     model = Sequential()
 
-    #model.add(Reshape())
+    model.add(Reshape(img_width, img_height, 3), input_shape=input_shape)
 
 
     #model.add(Activation('softmax'))
