@@ -13,8 +13,8 @@ from keras.preprocessing.image import ImageDataGenerator
 # Hyperparameters
 n_labels = 12
 num_enc_dec_blocks = 1
-nb_epoch = 20
-batch_size = 3
+nb_epoch = 1
+batch_size = 4
 nb_filters = 32
 kernel = (3,3)
 pool_size = (2,2)
@@ -22,10 +22,10 @@ padding = (1,1)
 data_gen_args = dict(
         #featurewise_center=True,
         #featurewise_std_normalization=True,
-        rotation_range = 20.,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        zoom_range=0.2,
+        #rotation_range = 20.,
+        #width_shift_range=0.1,
+        #height_shift_range=0.1,
+        #zoom_range=0.2,
         horizontal_flip=True)
 model_name = 'SegNet.h5'
 img_width = 480
@@ -33,20 +33,21 @@ img_height = 360
 input_shape = (img_height, img_width, 3)
 
 # Add an encoder block of three conv + batch norm + ReLU blocks followed by a pooling layer.
-def addEncoderBlock(model):
+def addEncoderBlock(model, num_conv_layers, num_neurons):
     model.add(ZeroPadding2D(padding=padding)),
-    model.add(Convolution2D(nb_filters, kernel[0], kernel[1], border_mode='valid'))
+    for i in range(num_conv_layers):
+        model.add(Convolution2D(num_neurons, kernel[0], kernel[1], border_mode='valid'))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=pool_size))
 
 
 # Add a decoder block of an upsampling layer followed by three blocks of conv + batch norm + ReLU.
-def addDecoderBlock(model, upsample=True):
-    if upsample:
-        model.add(UpSampling2D(size=pool_size))
+def addDecoderBlock(model, num_conv_layers, num_neurons):
+    model.add(UpSampling2D(size=pool_size))
     model.add(ZeroPadding2D(padding=padding))
-    model.add(Convolution2D(nb_filters, kernel[0], kernel[1], border_mode='valid'))
+    for i in range(num_conv_layers):
+        model.add(Convolution2D(num_neurons, kernel[0], kernel[1], border_mode='valid'))
     model.add(BatchNormalization())
 
 # Build the model.
@@ -55,9 +56,13 @@ def buildModel():
 
     model.add(Reshape((img_width, img_height, 3), input_shape=input_shape))
 
-    addEncoderBlock(model)
+    addEncoderBlock(model, 1, 32)
+    addEncoderBlock(model, 1, 64)
+    addEncoderBlock(model, 1, 128)
 
-    addDecoderBlock(model)
+    addDecoderBlock(model, 1, 128)
+    addDecoderBlock(model, 1, 64)
+    addDecoderBlock(model, 1, 32)
 
     model.add(Convolution2D(n_labels, 1,1, border_mode='valid'))
     model.add(Reshape((n_labels, img_height * img_width)))
@@ -66,7 +71,8 @@ def buildModel():
 
     model.compile(
             loss='categorical_crossentropy',
-            optimizer='adadelta')
+            optimizer='adadelta',
+            metrics=['accuracy'])
 
     return model
 
@@ -118,10 +124,8 @@ tb = TensorBoard(
         write_graph=True,
         write_images=True)
 
-batches = 0
-
 def reshapeY(y_raw):
-    y_train = np.reshape(y_raw, (3, img_height*img_width, 1))
+    y_train = np.reshape(y_raw, (batch_size, img_height*img_width, 1))
     y_train = y_train.swapaxes(0,1)
     y_train = y_train.swapaxes(1,2)
     Y_list = []
@@ -132,14 +136,44 @@ def reshapeY(y_raw):
 
     return Y_train
 
-for X_train, y_raw in training_generator:
-    Y_train = reshapeY(y_raw)
+def unshapeY(y_pred):
+    y = np.zeros((y_pred.shape[0]))
+    for a in range(y_pred.shape[0]):
+        y[a] = y_pred[a].argmax()
 
-    model.train_on_batch(X_train, Y_train)
+    Y = y.reshape((360,480,1))
+    return Y
 
-    batches += 1
-    print('Working...')
-    if batches >= len(X_train) / batch_size:
-        break
 
-print("I think it worked?")
+
+for e in range(nb_epoch):
+    batches = 0
+    print("Epoch: " + str(e+1))
+    for X_train, y_raw in training_generator:
+        Y_train = reshapeY(y_raw)
+
+        model.train_on_batch(X_train, Y_train)
+
+        batches += 1
+        print("Batch " + str(batches) + " of 150.")
+        if batches >= 150:
+            break
+    model.save('segnet.h5')
+
+    for X_val, y_raw in validation_generator:
+        Y_val = reshapeY(y_raw)
+        print(model.test_on_batch(X_val, Y_val))
+        if batches >= 30:
+            break
+
+model = load_model('segnet.h5')
+import cv2
+for X_vis, y_raw in validation_generator:
+    Y_pred = model.predict(X_vis, batch_size=batch_size)
+    print(X_vis.shape)
+    for i in range(batch_size):
+        cv2.imshow('Original', X_vis[i]/255)
+        print(Y_pred[i].shape)
+        cv2.imshow('Ground Truth', y_raw[i]/10)
+        cv2.imshow('Prediction', unshapeY(Y_pred[i])/10)
+        cv2.waitKey(0)
