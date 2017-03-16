@@ -2,18 +2,21 @@ import numpy as np
 import os
 
 from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D, Reshape, BatchNormalization #TODO: upsampling etc
+from keras.layers import Activation, Permute
+from keras.layers import Convolution2D, MaxPooling2D, Reshape
+from keras.layers import ZeroPadding2D, BatchNormalization, UpSampling2D
 from keras.utils import np_utils
 from keras import backend as K
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
 
 # Hyperparameters
+n_labels = 12
 num_enc_dec_blocks = 1
 nb_epoch = 20
+batch_size = 3
 nb_filters = 32
-kernel_size = (3,3)
+kernel = (3,3)
 pool_size = (2,2)
 padding = (1,1)
 data_gen_args = dict(
@@ -25,7 +28,7 @@ data_gen_args = dict(
         zoom_range=0.2,
         horizontal_flip=True)
 model_name = 'SegNet.h5'
-img_width = 640
+img_width = 480
 img_height = 360
 input_shape = (img_height, img_width, 3)
 
@@ -46,16 +49,24 @@ def addDecoderBlock(model, upsample=True):
     model.add(Convolution2D(nb_filters, kernel[0], kernel[1], border_mode='valid'))
     model.add(BatchNormalization())
 
-# TODO: Build the model.
+# Build the model.
 def buildModel():
     model = Sequential()
 
-    model.add(Reshape(img_width, img_height, 3), input_shape=input_shape)
+    model.add(Reshape((img_width, img_height, 3), input_shape=input_shape))
 
+    addEncoderBlock(model)
 
-    #model.add(Activation('softmax'))
+    addDecoderBlock(model)
 
-    #model.compile()
+    model.add(Convolution2D(n_labels, 1,1, border_mode='valid'))
+    model.add(Reshape((n_labels, img_height * img_width)))
+    model.add(Permute((2,1)))
+    model.add(Activation('softmax'))
+
+    model.compile(
+            loss='categorical_crossentropy',
+            optimizer='adadelta')
 
     return model
 
@@ -71,13 +82,18 @@ def buildDataGenerator(path):
     #mask_datagen.fit(masks, augment=True, seed=seed)
 
     image_generator = image_datagen.flow_from_directory(
-            path + '/images',
+            path + 'images/',
             class_mode=None,
-            seed=seed)
+            target_size=(img_height, img_width),
+            seed=seed,
+            batch_size=batch_size)
     mask_generator = mask_datagen.flow_from_directory(
-            path + 'masks',
+            path + 'masks/',
+            color_mode='grayscale',
             class_mode=None,
-            seed=seed)
+            target_size=(img_height, img_width),
+            seed=seed,
+            batch_size=batch_size)
 
     # Combine generators into one which yields images and masks.
     generator = zip(image_generator, mask_generator)
@@ -85,8 +101,8 @@ def buildDataGenerator(path):
     return generator
 
 model = buildModel()
-training_generator = buildDataGenerator('data/training')
-validation_generator = buildDataGenerator('data/validation')
+training_generator = buildDataGenerator('data/training/')
+validation_generator = buildDataGenerator('data/validation/')
 
 checkpoint = ModelCheckpoint(
         model_name,
@@ -102,10 +118,28 @@ tb = TensorBoard(
         write_graph=True,
         write_images=True)
 
-model.fit_generator(
-        training_generator,
-        samples_per_epoch=   ,
-        nb_epoch=nb_epoch,
-        callbacks=[checkpoint,tb]
-        validation_data=validation_generator,
-        nb_val_samples=   )
+batches = 0
+
+def reshapeY(y_raw):
+    y_train = np.reshape(y_raw, (3, img_height*img_width, 1))
+    y_train = y_train.swapaxes(0,1)
+    y_train = y_train.swapaxes(1,2)
+    Y_list = []
+    for y in y_train:
+        Y_list.append(np_utils.to_categorical(y,n_labels))
+    Y_train = np.array(Y_list)
+    Y_train = Y_train.swapaxes(0,1)
+
+    return Y_train
+
+for X_train, y_raw in training_generator:
+    Y_train = reshapeY(y_raw)
+
+    model.train_on_batch(X_train, Y_train)
+
+    batches += 1
+    print('Working...')
+    if batches >= len(X_train) / batch_size:
+        break
+
+print("I think it worked?")
