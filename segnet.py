@@ -13,8 +13,8 @@ from keras.preprocessing.image import ImageDataGenerator
 # Hyperparameters
 n_labels = 12
 num_enc_dec_blocks = 1
-nb_epoch = 1
-batch_size = 4
+nb_epoch = 1000
+batch_size = 10
 nb_filters = 32
 kernel = (3,3)
 pool_size = (2,2)
@@ -56,13 +56,13 @@ def buildModel():
 
     model.add(Reshape((img_width, img_height, 3), input_shape=input_shape))
 
-    addEncoderBlock(model, 1, 32)
+    #addEncoderBlock(model, 1, 32)
     addEncoderBlock(model, 1, 64)
-    addEncoderBlock(model, 1, 128)
+    #addEncoderBlock(model, 1, 128)
 
-    addDecoderBlock(model, 1, 128)
+    #addDecoderBlock(model, 1, 128)
     addDecoderBlock(model, 1, 64)
-    addDecoderBlock(model, 1, 32)
+    #addDecoderBlock(model, 1, 32)
 
     model.add(Convolution2D(n_labels, 1,1, border_mode='valid'))
     model.add(Reshape((n_labels, img_height * img_width)))
@@ -145,6 +145,7 @@ def unshapeY(y_pred):
     return Y
 
 
+#model = load_model('segnet-2.h5')
 
 for e in range(nb_epoch):
     batches = 0
@@ -152,25 +153,28 @@ for e in range(nb_epoch):
     for X_train, y_raw in training_generator:
         Y_train = reshapeY(y_raw)
 
+        batches += 1
+        print("Batch " + str(batches) + " of 1:")
         print(model.train_on_batch(X_train, Y_train))
 
-        batches += 1
-        print("Batch " + str(batches) + " of 150.")
-        if batches >= 150:
+        if batches >= 1:
             break
-    model.save('segnet.h5')
-
+    model.save('segnetmem-' + str(e+1) + '.h5')
+'''
+    val_acc = 0
+    batches = 0
     for X_val, y_raw in validation_generator:
+        batches += 1
         Y_val = reshapeY(y_raw)
-        print(model.test_on_batch(X_val, Y_val))
-        if batches >= 30:
+        val_acc += model.test_on_batch(X_val, Y_val)[1]
+        if batches >= 20:
             break
-
-model = load_model('segnet.h5')
+    print("val_acc: " + str(val_acc/20))
+'''
+#model = load_model('segnet-30.h5')
 import cv2
 for X_vis, y_raw in validation_generator:
     Y_pred = model.predict(X_vis, batch_size=batch_size)
-    print(X_vis.shape)
     for i in range(batch_size):
         cv2.imshow('Original', X_vis[i]/255)
         cv2.imshow('Ground Truth', y_raw[i]/10)
