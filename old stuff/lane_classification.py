@@ -9,14 +9,17 @@ from keras import backend as K
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
 
+from keras.applications.vgg16 import VGG16
+
 # HYPERPARAMETERS
-batch_size = 128
+batch_size = 16
 nb_classes = 2
 nb_epoch = 20
 nb_filters = 32
 pool_size = (2, 2)
 kernel_size = (3, 3)
-image_size = (180,320)
+#image_size = (180,320)
+image_size = (224,224)
 input_shape = (image_size[0], image_size[1], 3)
 
 def buildKerasSampleModel():
@@ -70,7 +73,7 @@ datagen = ImageDataGenerator(
         #featurewise_center=True,
         #featurewise_std_normalization=True,
         #rotation_range=20,
-        #horizontal_flip=True,
+        horizontal_flip=True,
         rescale=1./255)
 
 training_generator = datagen.flow_from_directory(
@@ -82,7 +85,7 @@ validation_generator = datagen.flow_from_directory(
         'data/validation/',
         target_size=image_size,
         batch_size=batch_size)
-modelName = 'lane_identifier.h5'
+modelName = 'VGG16-lane.h5'
 if modelName in os.listdir():
     model = load_model(modelName)
 else:
