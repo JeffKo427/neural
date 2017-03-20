@@ -45,28 +45,31 @@ def VGG_16(weights_path=None, headless=False):
     model.add(Convolution2D(512, 3, 3, activation='relu'))
     model.add(MaxPooling2D((2,2), strides=(2,2)))
 
-    '''
+
     model.add(Flatten())
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1000, activation='softmax'))
+
+
     '''
-
-
     model.add(Convolution2D(4096, 7, 7, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Convolution2D(4096, 1, 1, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Flatten())
     model.add(Dense(2, activation='softmax'))
-
+    '''
 
     if weights_path:
-        model.load_weights(weights_path, by_name=True)
+        model.load_weights(weights_path)
     #model.save_weights('vgg16_weights-nonlegacy.h5')
 
+    model.pop()
+
+    model.add(Dense(2, activation='softmax'))
 
     return model
 
@@ -79,7 +82,7 @@ if __name__ == "__main__":
     im = np.expand_dims(im, axis=0)
 
     # Test pretrained model
-    model = VGG_16('vgg16_weights-nonlegacy.h5')
+    model = VGG_16('vgg16_weights.h5')
     sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
     model.save('VGG16.h5')
