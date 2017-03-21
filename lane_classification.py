@@ -4,7 +4,7 @@ import os
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, Reshape, BatchNormalization, ZeroPadding2D
-from keras.utils import np_utils
+from keras.utils import np_utils, plot_model
 from keras import backend as K
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
@@ -33,7 +33,7 @@ def buildKerasSampleModel():
                 name='conv1-2', activation='relu'))
     model.add(MaxPooling2D(pool_size=pool_size))
 
-    '''
+
     model.add(Dropout(0.25))
     model.add(Flatten())
     model.add(Dense(128))
@@ -41,15 +41,15 @@ def buildKerasSampleModel():
     model.add(Dropout(0.5))
     model.add(Dense(nb_classes))
     model.add(Activation('softmax'))
-    '''
 
+    '''
     model.add(Dropout(0.25))
     model.add(Convolution2D(256, 90, 160, activation='relu', name='conv7'))
     model.add(Dropout(0.5))
     model.add(Convolution2D(2, 1, 1))
     model.add(Flatten())
     model.add(Activation('softmax'))
-
+    '''
 
     return model
 
@@ -122,6 +122,7 @@ validation_generator = datagen.flow_from_directory(
         target_size=image_size,
         batch_size=batch_size)
 modelName = 'wtf.h5'
+
 if modelName in os.listdir():
     model = load_model(modelName)
 else:
@@ -129,6 +130,8 @@ else:
     model.compile(loss='categorical_crossentropy',
             optimizer='adadelta',
             metrics=(['accuracy']))
+
+plot_model(model, 'CNN.png', show_shapes=True)
 
 checkpoint = ModelCheckpoint(
         modelName,
