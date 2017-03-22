@@ -7,8 +7,8 @@ path = sys.argv[1]
 raw_imgs = os.listdir(sys.argv[1])
 random.shuffle(raw_imgs)
 
-block_size = 37
-C = 10
+block_size = 11
+C = 5
 for img in raw_imgs:
     cv2.imread(path + img)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -23,14 +23,17 @@ for img in raw_imgs:
                 block_size=block_size,
                 C=C)
         cv2.imshow('Original', img)
-        cv2.imshow('mask', mask)
+        cv2.imshow('Mask', mask)
 
         press = cv2.waitKey(0)
         if press == 65362: #up arrow
-            #threshold up
+            C -= 1
         elif press == 65364: #down arrow
-            #threshold down
+            C += 1
         elif press == 119: #'w'
             #write
+            break
+        elif press == 27: #Esc
+            sys.exit()
         else:
-            #skip
+            break
