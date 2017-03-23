@@ -67,7 +67,7 @@ plot_model(model, 'model.png', show_shapes=True)
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy'])
-
+model.add(Dense(2))
 model.layers[0].set_weights([weights[0], weights[1]])
 model.layers[1].set_weights([weights[2], weights[3]])
 model.layers[4].set_weights([weights[4].reshape([14,14,64,128]), weights[5]])

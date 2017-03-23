@@ -1,10 +1,10 @@
 import numpy as np
 import os
 
-from keras.models import Sequential, load_model
+from keras.models import Model, load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, Reshape, BatchNormalization, ZeroPadding2D
-from keras.utils import np_utils
+from keras.utils import np_utils, plot_model
 from keras import backend as K
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
@@ -66,9 +66,19 @@ validation_generator = datagen.flow_from_directory(
         batch_size=batch_size)
 
 
-modelName = 'lane_classifier.h5'
+modelName = 'VGG_lane_classifier.h5'
 
-model = buildModel()
+vgg = VGG16(include_top=False, weights='imagenet', input_shape=input_shape)
+#for layer in vgg.layers:
+ #   layer.trainable=False
+flat = Flatten()(vgg.output)
+fc1 = Dense(1024, activation='relu')(flat)
+#fc2 = Dense(1024, activation='relu')(fc1)
+pred = Dense(2, activation='softmax')(fc1)
+
+model = Model(vgg.input, pred)
+plot_model(model, 'vgg.png', show_shapes=True)
+model.compile(optimizer='adadelta', loss='categorical_crossentropy', metrics=['accuracy'])
 
 checkpoint = ModelCheckpoint(
         modelName,

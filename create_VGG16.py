@@ -9,7 +9,7 @@ import cv2, numpy as np
 
 def VGG_16(weights_path=None, headless=False):
     model = Sequential()
-    model.add(ZeroPadding2D((1,1),input_shape=((3,224,224))))
+    model.add(ZeroPadding2D((1,1),input_shape=((224,224,3))))
     model.add(Convolution2D(64, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1,1)))
     model.add(Convolution2D(64, 3, 3, activation='relu'))
@@ -53,23 +53,9 @@ def VGG_16(weights_path=None, headless=False):
     model.add(Dropout(0.5))
     model.add(Dense(1000, activation='softmax'))
 
-
-    '''
-    model.add(Convolution2D(4096, 7, 7, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Convolution2D(4096, 1, 1, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Flatten())
-    model.add(Dense(2, activation='softmax'))
-    '''
-
     if weights_path:
         model.load_weights(weights_path)
     #model.save_weights('vgg16_weights-nonlegacy.h5')
-
-    model.pop()
-
-    model.add(Dense(2, activation='softmax'))
 
     return model
 
@@ -84,7 +70,7 @@ if __name__ == "__main__":
     # Test pretrained model
     model = VGG_16('vgg16_weights.h5')
     sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
-    model.save('VGG16.h5')
+    model.compile(optimizer='adadelta', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.save('VGG16-seq.h5')
     out = model.predict(im)
 print (np.argmax(out))
