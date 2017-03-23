@@ -1,4 +1,4 @@
-import numpy as np
+#import numpy as np
 import os
 import pickle
 import cv2
@@ -21,7 +21,7 @@ for f in files:
     elif f.endswith('1'):
         vids1.append(f)
     else:
-        print "File " + f + " not properly formatted, should end in either 0 or 1. Ignoring."
+        print("File " + f + " not properly formatted, should end in either 0 or 1. Ignoring.")
 
 # Write each frame of these videos to file.
 def writeFrames(video, train_directory, test_directory, size=(320,180)):
@@ -30,7 +30,7 @@ def writeFrames(video, train_directory, test_directory, size=(320,180)):
     while cap.get(1) != cap.get(7): # frame position != frame count
         ret, full_frame = cap.read()
         if not ret:
-            print "Failed to get frame, aborting split."
+            print("Failed to get frame, aborting split.")
             break
         #frame = cv2.resize(full_frame, size)
         if random.random() < 0.2:
@@ -46,9 +46,9 @@ val_true = 'data/validation/1/'
 val_false = 'data/validation/0/'
 #TODO: assert that these dirs are empty
 for v in vids0:
-    print "Splitting " + v + "..."
+    print("Splitting " + v + "...")
     writeFrames(v, train_false, val_false)
 for v in vids1:
-    print "Splitting " + v + "..."
+    print("Splitting " + v + "...")
     writeFrames(v, train_true, val_true)
 

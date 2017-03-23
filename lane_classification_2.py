@@ -4,7 +4,7 @@ import os
 from keras.models import Model, load_model
 from keras.layers import Dense, Dropout, Activation, Flatten, Input
 from keras.layers import Conv2D, MaxPooling2D, Reshape, BatchNormalization, ZeroPadding2D
-from keras.utils import np_utils, plot_model
+from keras.utils import np_utils#, plot_model
 from keras import backend as K
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
@@ -33,7 +33,9 @@ def buildModel():
     conv2 = Conv2D(64, 3, 3, border_mode='same', name='conv2-2', activation='relu')(conv2_1)
     pool2 = MaxPooling2D((2,2), strides=(2,2), name='pool2')(conv2)
 
-    fc6 = Flatten()(Dense(256, activation='relu', name='fc7')(Dropout(0.25)(pool2)))
+    flat = Dropout(0.25)(Flatten()(pool2))
+
+    fc6 = Dense(256, activation='relu', name='fc7')(flat)
     fc7 = Dense(256, activation='relu')(fc6)
 
     classification = Dense(2, activation='softmax')(fc6)
@@ -71,8 +73,12 @@ weights = vgg.get_weights()
 for i in range(6):
     model.layers[i].set_weights(weights[i])
 '''
-plot_model(model, 'flc.png', show_shapes=True)
+#plot_model(model, 'flc.png', show_shapes=True)
 model.compile(optimizer='adadelta', loss='categorical_crossentropy', metrics=['accuracy'])
+
+for x,y in training_generator:
+    print(x)
+    break
 
 checkpoint = ModelCheckpoint(
         modelName,
@@ -80,8 +86,7 @@ checkpoint = ModelCheckpoint(
         verbose=0,
         save_best_only=True,
         save_weights_only=False,
-        mode='auto',
-        period=1)
+        mode='auto')
 tb = TensorBoard(
         log_dir='./logs',
         histogram_freq=0,
@@ -90,9 +95,9 @@ tb = TensorBoard(
 
 model.fit_generator(
         training_generator,
-        samples_per_epoch=58501,
+        samples_per_epoch=35759,
         nb_epoch=nb_epoch,
         callbacks=[checkpoint,tb],
         validation_data=validation_generator,
-        nb_val_samples=14742)
+        nb_val_samples=9033)
 
