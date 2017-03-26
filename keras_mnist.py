@@ -14,9 +14,9 @@ from keras.layers import Conv1D, Conv2D, MaxPooling2D
 from keras import backend as K
 import numpy as np
 
-batch_size = 128
+batch_size = 512
 num_classes = 10
-epochs = 3
+epochs = 50
 
 # input image dimensions
 img_rows, img_cols = 28, 28
@@ -45,8 +45,6 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
-weights = load_model('CNN.h5').get_weights()
-
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
@@ -55,23 +53,24 @@ model.add(Conv2D(32, kernel_size=(3, 3),
 model.add(Conv2D(64, (3, 3), activation='relu',
                  padding='same'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+#model.add(Dropout(0.25))
 #model.add(Flatten())
 #model.add(Dense(128, activation='relu'))
 model.add(Conv2D(128, (14,14), activation='relu', padding='valid'))
-model.add(Dropout(0.5))
+#model.add(Dropout(0.5))
 #model.add(Dense(num_classes, activation='softmax'))
 model.add(Conv2D(num_classes, (1,1), activation='softmax'))
 model.add(Flatten())
 plot_model(model, 'model.png', show_shapes=True)
-model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adadelta(),
-              metrics=['accuracy'])
-model.add(Dense(2))
+model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+
+'''
+weights = load_model('CNN.h5').get_weights()
 model.layers[0].set_weights([weights[0], weights[1]])
 model.layers[1].set_weights([weights[2], weights[3]])
 model.layers[4].set_weights([weights[4].reshape([14,14,64,128]), weights[5]])
 model.layers[6].set_weights([weights[6].reshape([1,1,128,num_classes]), weights[7]])
+'''
 
 model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs,
           verbose=1, validation_data=(x_test, y_test))
