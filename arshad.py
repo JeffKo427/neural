@@ -8,13 +8,9 @@ Gets to 99.25% test accuracy after 12 epochs
 # pip install git+git://github.com/fchollet/keras
 # pip install tensorflow
 
-from __future__ import print_function
 import keras
-from keras.utils import plot_model
-from keras.datasets import mnist
 from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Flatten, Activation
-from keras.layers import Conv1D, Conv2D, MaxPooling2D
+from keras.layers import Dense
 from keras import backend as K
 import numpy as np
 
@@ -30,7 +26,7 @@ model.add(Dense(1, activation='sigmoid', input_shape=(3,)))
 model.compile(loss='binary_crossentropy', optimizer='adadelta')
 
 x_train = np.array([[0,0,0],[1,0,0],[0,1,0],[1,1,0],[0,0,1],[0,1,1],[1,1,1],[1,0,1]])
-y_train = training_set_outputs = np.array([[1,1,1,1,0,0,0,0]]).T
+y_train = training_set_outputs = np.array([[0,1,1,0,1,0,1,0]]).T
 x_test = np.array([[0,0,0], [1,0,0], [1,0,1]])
 
 model.fit(x_train, y_train, epochs=10000)
