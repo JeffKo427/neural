@@ -3,7 +3,8 @@ Gets to 99.25% test accuracy after 12 epochs
 (there is still a lot of margin for parameter tuning).
 16 seconds per epoch on a GRID K520 GPU.
 '''
-# Run these commands to install dependencies:
+# Run these commands to install dependencies, assuming you're on Ubuntu:
+# sudo apt-get install pip
 # pip install git+git://github.com/fchollet/keras
 # pip install tensorflow
 
