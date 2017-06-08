@@ -3,3 +3,4 @@
 *.png
 logs/*
 data/*
+MNIST_data/*
