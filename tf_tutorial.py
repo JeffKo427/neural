@@ -11,6 +11,8 @@ sess = tf.InteractiveSession()
 
 x = tf.placeholder(tf.float32, shape=[None, 784])
 y_ = tf.placeholder(tf.float32, shape=[None, 10])
+tf.add_to_collection('placeholders', x)
+tf.add_to_collection('placeholders', y_)
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -47,6 +49,7 @@ h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
 keep_prob = tf.placeholder(tf.float32)
+tf.add_to_collection('placeholders', keep_prob)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
 W_fc2 = weight_variable([1024, 10])
@@ -60,10 +63,11 @@ train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
 correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+tf.add_to_collection('accuracy', accuracy)
 
 sess.run(tf.global_variables_initializer())
-for i in range(20000):
-    batch = mnist.train.next_batch(50)
+for i in range(2000):
+    batch = mnist.train.next_batch(100)
     if i%100 == 0:
         train_accuracy = accuracy.eval(feed_dict={
             x: batch[0], y_: batch[1], keep_prob: 1.0})
@@ -72,3 +76,6 @@ for i in range(20000):
 
 print("test accuracy %g"%accuracy.eval(feed_dict={
     x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+
+saver = tf.train.Saver()
+saver.save(sess, 'tf_tutorial_model')
